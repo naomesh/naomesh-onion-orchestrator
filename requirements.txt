@@ -1,0 +1,4 @@
+# Production dependancies
+
+enoslib>=8.0.1
+prefect>=2.7.5
