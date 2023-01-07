@@ -1,48 +1,57 @@
+from enoslib.api import generate_inventory
+from enoslib.infra.enos_g5k.provider import G5k
+from enoslib.infra.enos_g5k.configuration import Configuration
+
 import logging
 import os
 
-import enoslib as en
+logging.basicConfig(level=logging.INFO)
 
-logger = logging.getLogger(__name__)
-
-@en.enostask(new=True)
-def g5k(config, force, env=None, **kwargs):
-    # Load the configuration.
-    # Alternatively you can build the configuration programmatically
-    conf = en.G5kConf.from_dictionnary(config["g5k"])
-    provider = en.G5k(conf)
-    roles, networks = provider.init(force_deploy=force)
-    env["config"] = config
-    env["roles"] = roles
-    env["networks"] = networks
-    env["provider"] = provider
-
-@en.enostask(new=True)
-def vagrant(config, force, env=None, **kwargs):
-    # Load the configuration.
-    # Alternatively you can build the configuration programmatically
-    conf = en.VagrantConf.from_dictionnary(config["vagrant"])
-    provider = en.Vagrant(conf)
-    roles, networks = provider.init(force_deploy=force)
-    env["config"] = config
-    env["roles"] = roles
-    env["networks"] = networks
-    env["provider"] = provider
-
-@en.enostask()
-def prepare(env=None, **kwargs):
-    roles = env["roles"]
-    with en.play_on(roles=roles) as p:
-        p.debug(msg="Hello World !")
-
-@en.enostask()
-def destroy(env=None, **kwargs):
-    provider = env["provider"]
-    provider.destroy()
-
-PROVIDERS = {
-    "g5k": g5k,
-    "vagrant": vagrant,
-    #    "static": static
-    #    "chameleon": chameleon
+provider_conf = {
+    "resources": {
+        "machines": [
+            {
+                "roles": ["control"],
+                "cluster": "paravance",
+                "nodes": 1,
+                "primary_network": "n1",
+                "secondary_networks": ["n2"],
+            },
+            {
+                "roles": ["control", "compute"],
+                "cluster": "parasilo",
+                "nodes": 1,
+                "primary_network": "n1",
+                "secondary_networks": ["n2"],
+            },
+        ],
+        "networks": [
+            {
+                "id": "n1",
+                "type": "kavlan",
+                "roles": ["my_network"],
+                "site": "rennes",
+            },
+            {
+                "id": "n2",
+                "type": "kavlan",
+                "roles": ["my_second_network"],
+                "site": "rennes",
+            },
+        ],
+    }
 }
+
+# path to the inventory
+inventory = os.path.join(os.getcwd(), "hosts")
+
+# claim the resources
+conf = Configuration.from_dictionnary(provider_conf)
+provider = G5k(conf)
+roles, networks = provider.init()
+
+# generate an inventory compatible with ansible
+generate_inventory(roles, networks, inventory, check_networks=True)
+
+# destroy the reservation
+provider.destroy()

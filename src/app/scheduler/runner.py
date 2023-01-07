@@ -1,11 +1,5 @@
-from prefect.task_runners import BaseTaskRunner 
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Optional
-)
+from prefect.task_runners import BaseTaskRunner
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 from prefect.utilities.collections import AutoEnum
 
@@ -20,6 +14,7 @@ from prefect.utilities.asyncutils import A
 from prefect.utilities.collections import AutoEnum
 
 R = TypeVar("R")
+
 
 class TaskConcurrencyType(AutoEnum):
     SEQUENTIAL = AutoEnum.auto()
