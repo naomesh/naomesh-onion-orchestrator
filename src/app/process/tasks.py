@@ -5,7 +5,6 @@ import enoslib as en
 
 logger = logging.getLogger(__name__)
 
-
 @en.enostask(new=True)
 def g5k(config, force, env=None, **kwargs):
     # Load the configuration.
@@ -17,7 +16,6 @@ def g5k(config, force, env=None, **kwargs):
     env["roles"] = roles
     env["networks"] = networks
     env["provider"] = provider
-
 
 @en.enostask(new=True)
 def vagrant(config, force, env=None, **kwargs):
@@ -31,19 +29,16 @@ def vagrant(config, force, env=None, **kwargs):
     env["networks"] = networks
     env["provider"] = provider
 
-
 @en.enostask()
 def prepare(env=None, **kwargs):
     roles = env["roles"]
     with en.play_on(roles=roles) as p:
         p.debug(msg="Hello World !")
 
-
 @en.enostask()
 def destroy(env=None, **kwargs):
     provider = env["provider"]
     provider.destroy()
-
 
 PROVIDERS = {
     "g5k": g5k,

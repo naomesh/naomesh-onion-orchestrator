@@ -6,4 +6,4 @@
 
 ## Dev setup
 
-1. `pip install -r dev-requirements.txt`
+1. `pip install -r requirements-dev.txt`
