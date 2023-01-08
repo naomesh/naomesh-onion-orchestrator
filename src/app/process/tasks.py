@@ -1,57 +1,33 @@
-from enoslib.api import generate_inventory
-from enoslib.infra.enos_g5k.provider import G5k
-from enoslib.infra.enos_g5k.configuration import Configuration
-
 import logging
-import os
+import enoslib as en
 
-logging.basicConfig(level=logging.INFO)
+def reserve(site: str):
+    en.init_logging(level=logging.INFO)
+    en.check()
+    
+    en.g5k
+    
+    CLUSTER = "paravance"
+    SITE = en.g5k_api_utils.get_cluster_site(CLUSTER)
+    
+    prod_network = en.G5kNetworkConf(
+        roles=["mynetwork"],
+        type="prod",
+        site=SITE
+    )
+    
+    conf = (
+        en.G5kConf()
+            .add_network_conf(prod_network)
+            .add_machine(cluster=CLUSTER, nodes=1, roles=["compute"], primary_network=prod_network)
+            .finalize()
+    )
 
-provider_conf = {
-    "resources": {
-        "machines": [
-            {
-                "roles": ["control"],
-                "cluster": "paravance",
-                "nodes": 1,
-                "primary_network": "n1",
-                "secondary_networks": ["n2"],
-            },
-            {
-                "roles": ["control", "compute"],
-                "cluster": "parasilo",
-                "nodes": 1,
-                "primary_network": "n1",
-                "secondary_networks": ["n2"],
-            },
-        ],
-        "networks": [
-            {
-                "id": "n1",
-                "type": "kavlan",
-                "roles": ["my_network"],
-                "site": "rennes",
-            },
-            {
-                "id": "n2",
-                "type": "kavlan",
-                "roles": ["my_second_network"],
-                "site": "rennes",
-            },
-        ],
-    }
-}
-
-# path to the inventory
-inventory = os.path.join(os.getcwd(), "hosts")
-
-# claim the resources
-conf = Configuration.from_dictionnary(provider_conf)
-provider = G5k(conf)
-roles, networks = provider.init()
-
-# generate an inventory compatible with ansible
-generate_inventory(roles, networks, inventory, check_networks=True)
-
-# destroy the reservation
-provider.destroy()
+    print(conf)
+    provider = en.G5k(conf)
+    roles, networks = provider.init()
+    
+    print(roles)
+    print(networks)
+    
+    provider.destroy()
