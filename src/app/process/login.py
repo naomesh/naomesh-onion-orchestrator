@@ -1,7 +1,6 @@
 from enoslib import g5k_api_utils
 from app.core.config import env
-from enoslib import api
-from ansible.module_utils.common.collections import ImmutableDict
+
 
 # HACK: Tell Bapiste to create an api for this
 with g5k_api_utils._api_lock:
