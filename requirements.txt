@@ -1,6 +1,7 @@
 # Production dependancies
 
-enoslib>=8.0.1
+# enoslib>=8.0.1
+enoslib>=git+https://github.com/BeyondTheClouds/enoslib.git@b80b0a451e2934bfd30e0e9a53924807be7b9255#egg=enoslib
 prefect>=2.7.7
 django-environ~=0.9.0
 python-grid5000~=1.2.4

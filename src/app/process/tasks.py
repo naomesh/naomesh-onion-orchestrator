@@ -25,7 +25,6 @@ def reserve():
     )
 
     provider = en.G5k(conf)
-    provider.
     roles, networks = provider.init()
 
     # Install docker
@@ -49,9 +48,9 @@ def reserve():
 
     docker.deploy()
 
-    # Start a docker container on the node
+    # Start an openmvs docker container on the node
     with en.actions(roles=roles) as t:
-        t.raw("modprobe ifb")  # ???
+        t.raw("modprobe ifb")
         t.docker_container(
             name="openmvs",
             image="openmvs/openmvs-ubuntu",
@@ -59,9 +58,6 @@ def reserve():
             command="echo 'ready'",
             capabilities=["NET_ADMIN"],
         )
-
-    print(roles)
-    print(networks)
 
     results = en.run_command("whoami", roles=roles)
     result = results.filter(host=roles["control"][0].alias)[0]
