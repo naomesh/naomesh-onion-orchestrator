@@ -2,6 +2,7 @@ import logging
 import enoslib as en
 from app.core.config import env
 
+
 def reserve():
     en.init_logging(level=logging.INFO)
     en.check()
@@ -9,7 +10,11 @@ def reserve():
     # api = en.g5k_api_utils.get_api_client()
     # print(api.sites[site].clusters["econome"])
 
-    network = en.G5kNetworkConf(type="prod", roles=["naomesh"], site=env("NAOMESH_ORCHESTRATOR_GRID5000_SITE"))
+    network = en.G5kNetworkConf(
+        type="prod",
+        roles=["naomesh"],
+        site=env("NAOMESH_ORCHESTRATOR_GRID5000_SITE"),
+    )
 
     conf = (
         en.G5kConf()
@@ -35,7 +40,7 @@ def reserve():
     # login to bypass docker-hub rate-limiting
     docker_credentials = dict(
         login=env("NAOMESH_ORCHESTRATOR_DOCKER_USERNAME"),
-        password=env("NAOMESH_ORCHESTRATOR_DOCKER_PASSWORD")
+        password=env("NAOMESH_ORCHESTRATOR_DOCKER_PASSWORD"),
     )
 
     # create the docker instance with the credentials
@@ -43,7 +48,7 @@ def reserve():
         agent=roles["control"],
         bind_var_docker="/tmp/docker",
         registry_opts=registry_opts,
-        credentials=docker_credentials
+        credentials=docker_credentials,
     )
 
     docker.deploy()
