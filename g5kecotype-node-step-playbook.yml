@@ -1,0 +1,19 @@
+---
+- name: Run one step
+  hosts: all
+  vars:
+    container_name: openmvsmvg
+    command_name: mvgmvs
+    pic_dir: pictures
+    work_dir: workdir
+    step: "{{ step_idx }}"
+  tasks:
+    - name: Run mvgmvs command
+      community.docker.docker_container_exec:
+        container: "{{ container_name }}"
+        command: "{{ command_name }} {{ pic_dir }} {{ work_dir }} --steps {{ step }}"
+        chdir: /home/user
+      register: result
+    - name: Print stdout
+      debug:
+        var: result.stdout

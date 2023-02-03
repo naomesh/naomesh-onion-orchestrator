@@ -1,0 +1,9 @@
+- name: install pip
+  include_role:
+    name: geerlingguy.pip
+    apply:
+      become: yes
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose

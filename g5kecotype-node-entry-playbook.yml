@@ -1,0 +1,57 @@
+---
+- name: Push data images
+  hosts: all
+  tasks:
+    - find: paths="dataset/" recurse=yes patterns="*"
+      register: files_to_copy
+    - name: Upload images
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /mnt/pictures
+        mode: 0777
+      with_items: "{{ files_to_copy.files }}"
+- name: Setup docker-compose
+  hosts: all
+  tasks:
+    - name: Install docker-compose python package
+      ansible.builtin.pip:
+        name: docker-compose
+    - name: Push docker-compose.yml and .env
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "/{{ ansible_user }}/{{ item }}"
+      with_items:
+        - g5kecotype-node-docker-compose.yml
+        - .env
+- name: Set docker containers
+  hosts: all
+  # debugger: on_failed
+  vars:
+    container_name: openmvsmvg
+  tasks:
+    - name: remove container
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+        force_kill: true
+    - name: Docker compose up
+      docker_compose:
+        project_src: "/{{ ansible_user }}"
+        files:
+          - g5kecotype-node-docker-compose.yml
+        state: present
+        # remove_orphans: true
+        # restarted: true
+        recreate: always
+        debug: true
+    - name: Container present
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        command: sleep infinity
+        state: started
+    - name: Create directories
+      community.docker.docker_container_exec:
+        container: "{{ container_name }}"
+        command: mkdir workdir && mkdir pictures
+        chdir: /home/user
+      register: result
