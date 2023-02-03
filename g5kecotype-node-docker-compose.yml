@@ -1,0 +1,27 @@
+# This is the docker-compose file deployed on the g5k node
+
+version: '3.8'
+
+services:
+  # s3 vfs: https://docs.docker.com/registry/storage-drivers/s3/
+  # used to fetch needed ressources and store outputs during the
+  # openMVS reconstruction pipeline 
+  s3fs:
+    privileged: true
+    image: efrecon/s3fs:1.90
+    restart: unless-stopped
+    env_file: .env # AWS_S3 credentials
+    volumes:
+      - /mnt/s3data:/opt/s3fs/bucket:shared
+
+  # OpenMVS / MVG node used to run the reconstruction pipeline
+  # will have access to the S3 bucket at `/mnt/s3data`
+  openmvsmvg:
+    image: ghcr.io/naomesh/openmvsmvg:1.0.0
+    container_name: openmvsmvg
+    restart: unless-stopped
+    depends_on:
+      - s3fs
+    volumes:
+      - /mnt/s3data:/home/user/workdir:shared # synced with the S3 bucket, workdir for openmvgmvs
+      - /mnt/pictures:/pictures:rw # pulled pictures from the S3 bucket

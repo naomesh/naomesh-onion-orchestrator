@@ -1,8 +1,9 @@
 import logging
 
 # flake8: noqa
-import app.process.login
-from app.process.tasks import reserve
+import app.enoslib.login
+from app.scheduler.flows import reserve
+
 
 logging.basicConfig(level=logging.INFO)
 
