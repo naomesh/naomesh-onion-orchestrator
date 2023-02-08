@@ -79,7 +79,7 @@ def setup_node(pictures_hash: str):
 
         conf = (
             en.G5kConf()
-            .from_settings(job_type="allow_classic_ssh", job_name=task_name)
+            .from_settings(job_name=task_name)
             .add_network_conf(network)
             .add_machine(
                 primary_network=network,
