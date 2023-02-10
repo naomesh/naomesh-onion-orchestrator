@@ -1,3 +1,13 @@
+[project]
+name="naomesh-onion-orchestrator"
+version="0.0.1"
+
+#[build-system]
+#requires=["setuptools", "patch"]
+#build-backend = "setuptools.build_meta"
+#backend-path = ["."]
+#build-backend = "patchbackend"
+
 [tool.versioneer]
 VCS = "git"
 style = "pep440"
@@ -5,6 +15,7 @@ versionfile_source = "src/app/_version.py"
 versionfile_build = "build/lib/app/_.py"
 tag_prefix = "naomesh-onion-orchestrator-"
 parentdir_prefix = "naomesh-onion-orchestrator-"
+
 [tool.black]
 line-length = 79
 target-version = ['py38']
