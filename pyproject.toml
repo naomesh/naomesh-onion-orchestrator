@@ -2,11 +2,6 @@
 name="naomesh-onion-orchestrator"
 version="0.0.1"
 
-#[build-system]
-#requires=["setuptools", "patch"]
-#build-backend = "setuptools.build_meta"
-#backend-path = ["."]
-#build-backend = "patchbackend"
 
 [tool.versioneer]
 VCS = "git"
