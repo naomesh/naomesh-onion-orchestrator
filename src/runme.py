@@ -7,6 +7,8 @@ from functools import partial
 import anyio
 import anyio.abc
 import prefect
+from app.scheduler.deployments import apply_deployments
+from app.services import SERVICES_TO_RUN
 from prefect.settings import (
     PREFECT_LOGGING_SERVER_LEVEL,
     PREFECT_ORION_API_HOST,
@@ -137,6 +139,7 @@ async def start(
                 stream_output=True,
             )
         )
+        await apply_deployments()
 
         # Explicitly handle the interrupt signal here, as it will allow us to
         # cleanly stop the Orion uvicorn server. Failing to do that may cause a
