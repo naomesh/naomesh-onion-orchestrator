@@ -1,11 +1,11 @@
 {
-	"python.linting.mypyEnabled": true,
-	"python.formatting.provider": "black",
-	"python.linting.flake8Enabled": true,
-	"python.linting.enabled": true,
-	"editor.insertSpaces": true,
-	"python.analysis.typeCheckingMode": "basic",
-	"[python]": { // fix issue https://github.com/microsoft/vscode-python/issues/1883
-		"editor.formatOnPaste": false
-	}
+    "python.linting.mypyEnabled": true,
+    "python.formatting.provider": "black",
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+    "editor.insertSpaces": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "[python]": { // fix issue https://github.com/microsoft/vscode-python/issues/1883
+        "editor.formatOnPaste": false
+    }
 }
