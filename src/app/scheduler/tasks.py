@@ -3,13 +3,13 @@ from os import path
 
 import enoslib as en
 from enoslib import Roles
-from prefect import task
 
 from app.core.config import BASE_DIR, env
 from app.scheduler.utils import (
     task_input_hash_no_roles,
     with_redirect_stdout_to_run_logger,
 )
+from prefect import task
 
 
 @task(
@@ -19,12 +19,19 @@ from app.scheduler.utils import (
     cache_key_fn=task_input_hash_no_roles,
     # TODO: add an env variable for this, should be the duration of the g5k job
     cache_expiration=timedelta(hours=2),
+    persist_result=True,
 )
 def run_step(
-    _picture_obj_key: str, _politic_name: str, step_idx: int, roles: "Roles"
+    picture_obj_key: "str",
+    politic_energy_name: "str",
+    politic_quality_name: "str",
+    node_id: "str",
+    step_idx: "int",
+    roles: "Roles",
 ):
     """Run one step of the pipeline"""
     with with_redirect_stdout_to_run_logger():
+        print(f"Running step {step_idx} on node {node_id[0]}")
         en.run_ansible(
             [path.join(BASE_DIR, "g5kecotype-node-step-playbook.yml")],
             roles=roles,
@@ -33,7 +40,12 @@ def run_step(
 
 
 @task(name="Setup node", retries=1)
-def setup_node(picture_obj_key: str, _politic_name: str):
+def setup_node(
+    job_id: "str",
+    picture_obj_key: "str",
+    politic_energy_name: "str",
+    politic_quality_name: "str",
+):
     with with_redirect_stdout_to_run_logger():
         en.check()
         network = en.G5kNetworkConf(
@@ -42,7 +54,7 @@ def setup_node(picture_obj_key: str, _politic_name: str):
             site=env("NAOMESH_ORCHESTRATOR_GRID5000_SITE"),
         )
 
-        task_name = f"naomesh_task_{picture_obj_key}"
+        task_name = f"naomesh_task_{job_id}"
 
         conf = (
             en.G5kConf()
@@ -87,5 +99,6 @@ def setup_node(picture_obj_key: str, _politic_name: str):
             [path.join(BASE_DIR, "g5kecotype-node-entry-playbook.yml")],
             roles=roles,
         )
-
-    return roles, provider
+    host = ""
+    print(provider.hosts)
+    return roles, provider, host
