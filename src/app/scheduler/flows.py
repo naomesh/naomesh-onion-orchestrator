@@ -2,46 +2,96 @@ import logging
 from contextlib import ExitStack
 
 import enoslib as en
-from prefect import flow, get_run_logger
-from prefect.task_runners import SequentialTaskRunner
 
+from app.orion.naomesh_orchestration_policy import EnergyPolicy, QualityPolicy
 from app.scheduler.tasks import run_step, setup_node
+from prefect import flow, get_run_logger, tags
+from prefect.task_runners import SequentialTaskRunner
 
 
 @flow(
     name="Photogrammetry v0.0.1 flow",
-    task_runner=SequentialTaskRunner(),
+    version="0.0.1",
     log_prints=True,
+    persist_result=True,
+    task_runner=SequentialTaskRunner(),
+    retries=1,
 )
-def reserve(picture_obj_key: str = "hashhhhh", _politic_name: str = "green"):
-    """_summary_
-
-    Args:
-        picture_obj_key (str, optional): _description_. Defaults to "hash".
-    """
+def photogrammetry_flow(
+    job_id: str,
+    picture_obj_key,
+    politic_energy_name: str = EnergyPolicy.GREEN.value,
+    politic_quality_name: str = QualityPolicy.GOOD.value,
+):
+    """Photogrammetry flow"""
     print(get_run_logger())
     en.init_logging(level=logging.INFO).getLogger()
 
-    roles, provider = setup_node(picture_obj_key, _politic_name)
+    result = setup_node.submit(
+        job_id, picture_obj_key, politic_energy_name, politic_quality_name
+    )
+    roles, provider, host = result.result()
     # SEQUENTIAL: 0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15
     with ExitStack() as _:
         # 0. Intrinsics analysis (openMVG_main_SfMInit_ImageListing)
-        run_step(picture_obj_key, _politic_name, 0, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            0,
+            roles,
+        ).result()
 
         # 1. Compute features (openMVG_main_ComputeFeatures)
-        run_step(picture_obj_key, _politic_name, 1, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            1,
+            roles,
+        ).result()
 
         # 2. Compute pairs (openMVG_main_PairGenerator)
-        run_step(picture_obj_key, _politic_name, 2, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            2,
+            roles,
+        ).result()
 
         # 3. Compute matches (openMVG_main_ComputeMatches)
-        run_step(picture_obj_key, _politic_name, 3, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            3,
+            roles,
+        ).result()
 
         # 4. Filter matches (openMVG_main_GeometricFilter)
-        run_step(picture_obj_key, _politic_name, 4, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            4,
+            roles,
+        ).result()
 
         # 5. Incremental reconstruction (openMVG_main_IncrementalSfM)
-        run_step(picture_obj_key, _politic_name, 5, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            5,
+            roles,
+        ).result()
 
         # 6. Global reconstruction (openMVG_main_GlobalSfM)
         # run_step(picture_obj_key, 6, roles)
@@ -57,19 +107,54 @@ def reserve(picture_obj_key: str = "hashhhhh", _politic_name: str = "green"):
         # run_step(picture_obj_key, 10, roles)
 
         # 11. Export to openMVS (openMVG_main_openMVG2openMVS)
-        run_step(picture_obj_key, _politic_name, 11, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            11,
+            roles,
+        ).result()
 
         # 12. Densify point-cloud (DensifyPointCloud)
-        run_step(picture_obj_key, _politic_name, 12, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            12,
+            roles,
+        ).result()
 
         # 13. Reconstruct the mesh (ReconstructMesh)
-        run_step(picture_obj_key, _politic_name, 13, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            13,
+            roles,
+        ).result()
 
         # 14. Refine the mesh (RefineMesh)
-        run_step(picture_obj_key, _politic_name, 14, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            14,
+            roles,
+        ).result()
 
         # 15. Texture the mesh (TextureMesh)
-        run_step(picture_obj_key, _politic_name, 15, roles)
+        run_step.submit(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            host,
+            15,
+            roles,
+        ).result()
 
         # 16. Estimate disparity-maps (DensifyPointCloud)
         # run_step(picture_obj_key, 16, roles)
@@ -77,3 +162,15 @@ def reserve(picture_obj_key: str = "hashhhhh", _politic_name: str = "green"):
         # run_step(picture_obj_key, 17, roles)
 
     # provider.destroy()
+
+
+def start_photogrammetry_flow_with_tags(
+    job_id: str,
+    picture_obj_key,
+    politic_energy_name: str = EnergyPolicy.GREEN.value,
+    politic_quality_name: str = QualityPolicy.GOOD.value,
+):
+    with tags(politic_energy_name, politic_quality_name):
+        photogrammetry_flow(
+            job_id, picture_obj_key, politic_energy_name, politic_quality_name
+        )
