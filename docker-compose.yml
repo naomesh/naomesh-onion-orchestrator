@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  bus:
+    container_name: "bus"
+    hostname: "bus"
+    image: rabbitmq:3.9-management-alpine
+    environment:
+        - RABBITMQ_DEFAULT_USER=naomesh
+        - RABBITMQ_DEFAULT_PASS=naomesh
+    ports:
+        # AMQP protocol port
+        - '5672:5672'
+        # HTTP management UI
+        - '15672:15672'
+  db:
+    container_name: "db"
+    hostname: "db"
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=naomesh
+      - POSTGRES_PASSWORD=naomesh
+      - POSTGRES_DB=onion
+    ports:
+      - "5432:5432"
