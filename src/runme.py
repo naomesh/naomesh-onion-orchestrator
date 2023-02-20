@@ -6,9 +6,16 @@ from functools import partial
 
 import anyio
 import anyio.abc
+import nest_asyncio
+from tomodachi.launcher import ServiceLauncher
+
+import app.enoslib.login  # noqa
 import prefect
+from app._version import get_versions
+from app.orion.config import apply_prefect_config_settings  # noqa
 from app.scheduler.deployments import apply_deployments
 from app.services import SERVICES_TO_RUN
+
 from prefect.settings import (
     PREFECT_LOGGING_SERVER_LEVEL,
     PREFECT_ORION_API_HOST,
@@ -19,17 +26,9 @@ from prefect.settings import (
 )
 from prefect.utilities.processutils import kill_on_interrupt, run_process
 
-# flake8: noqa
-import app.enoslib.login
-
-from app._version import get_versions
-
-# from app.scheduler.flows import reserve
+nest_asyncio.apply()
 
 logging.basicConfig(level=logging.INFO)
-
-# if __name__ == "__main__":
-#     reservation = reserve()
 
 
 def generate_welcome_blurb(base_url, ui_enabled: bool):
@@ -37,7 +36,7 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
 
     blurb = textwrap.dedent(
         r"""
-                    /~    NAOMESH ONION OCHERSTRATOR 
+                    /~    NAOMESH ONION OCHERSTRATOR
                     \  \ /**     VERSION {version} BUNDLED WITH
                     \ ////        ___ ___ ___ ___ _____________    ___ ___ ___  __   _  _
                     // //        | _ \ _ \ __| __| __/ __|_   _|  / _ \| _ \_ _/ _ \| \| |
@@ -60,10 +59,10 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
                 ++///~~\//_
                 \\ \ \ \  \_
                 /  /    \
-        """
+        """  # noqa: E501
     ).format(
-        api_url=base_url + "/api",
-        docs_url=base_url + "/docs",
+        api_url=f"{base_url}/api",
+        docs_url=f"{base_url}/docs",
         version=__version__,
     )
 
@@ -75,14 +74,16 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
 
     dashboard_not_built = textwrap.dedent(
         """
-        The dashboard is not built. It looks like you're on a development version.
+        The dashboard is not built.
+        It looks like you're on a development version.
         See `prefect dev` for development commands.
         """
     )
 
     dashboard_disabled = textwrap.dedent(
         """
-        The dashboard is disabled. Set `PREFECT_ORION_UI_ENABLED=1` to reenable it.
+        The dashboard is disabled.
+        Set `PREFECT_ORION_UI_ENABLED=1` to reenable it.
         """
     )
 
@@ -96,7 +97,7 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
     return blurb
 
 
-async def start(
+async def start_orion_and_tomodachi(
     host: str = PREFECT_ORION_API_HOST.value(),
     port: int = PREFECT_ORION_API_PORT.value(),
     log_level: str = PREFECT_LOGGING_SERVER_LEVEL.value(),
@@ -113,25 +114,25 @@ async def start(
     server_env["PREFECT_ORION_SERVICES_LATE_RUNS_ENABLED"] = str(late_runs)
     server_env["PREFECT_ORION_SERVICES_UI"] = str(ui)
     server_env["PREFECT_LOGGING_SERVER_LEVEL"] = log_level
+    apply_prefect_config_settings()
 
     base_url = f"http://{host}:{port}"
 
     async with anyio.create_task_group() as tg:
         print(generate_welcome_blurb(base_url, ui_enabled=ui))
         print("\n")
-
+        await tg.start(start_tomodachi_services)
         orion_process_id = await tg.start(
             partial(
                 run_process,
                 command=[
                     "uvicorn",
                     "--app-dir",
-                    # quote wrapping needed for windows paths with spaces
                     f'"{prefect.__module_path__.parent}"',
                     "--factory",
                     "prefect.orion.api.server:create_app",
                     "--host",
-                    str(host),
+                    host,
                     "--port",
                     str(port),
                 ],
@@ -149,12 +150,12 @@ async def start(
         # https://github.com/PrefectHQ/orion/issues/2475
 
         kill_on_interrupt(orion_process_id, "Orion", print)  # type: ignore
-
     print("Orion stopped!")
 
 
-async def main():
-    await start()
+async def start_tomodachi_services(task_status):
+    task_status.started()
+    ServiceLauncher.run_until_complete(SERVICES_TO_RUN, None, None)
 
 
-asyncio.run(main())
+asyncio.run(start_orion_and_tomodachi())
