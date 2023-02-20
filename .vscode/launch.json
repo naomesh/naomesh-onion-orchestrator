@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Runme",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/runme.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Orion",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "console": "integratedTerminal",
+            "args": [
+                "--app-dir",
+                "${workspaceFolder}/src",
+                "--factory",
+                "prefect.orion.api.server:create_app",
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "4200",
+            ],
+            "justMyCode": true
+        }
+    ]
+}
