@@ -8,6 +8,8 @@ python-grid5000~=1.2.4
 requests~=2.28.1
 paho-mqtt~=1.6.1
 patch==1.*
+tomodachi>=0.24.0
+httpx>=0.15.4,<0.24.0
 
 # Keep this dot below, it will apply pyproject.toml config as it will install the project
 .
