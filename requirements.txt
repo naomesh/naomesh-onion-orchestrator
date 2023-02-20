@@ -10,6 +10,8 @@ paho-mqtt~=1.6.1
 patch==1.*
 tomodachi>=0.24.0
 httpx>=0.15.4,<0.24.0
+attrs>=21.3.0
+python-dateutil>=2.8.0
 
 # Keep this dot below, it will apply pyproject.toml config as it will install the project
 .
