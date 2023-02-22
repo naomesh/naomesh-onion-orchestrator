@@ -158,4 +158,6 @@ async def start_tomodachi_services(task_status):
     ServiceLauncher.run_until_complete(SERVICES_TO_RUN, None, None)
 
 
-asyncio.run(start_orion_and_tomodachi())
+asyncio.get_event_loop().run_until_complete(
+    asyncio.gather(start_orion_and_tomodachi())
+)
