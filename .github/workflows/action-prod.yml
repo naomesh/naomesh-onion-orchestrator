@@ -26,6 +26,9 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
+          context: .
+          file: ./Dockerfile
+          tags: ***/***
           tags: rouretl/naomesh-onion-orchestrator:latest
           build-args: |
             NAOMESH_ORCHESTRATOR_GRID5000_USERNAME=${{secrets.GRID5000_USERNAME}}
