@@ -6,6 +6,6 @@ import app.services.current_allocated_nodes as current_allocated_nodes
 
 # A list of tomodachi services to start
 SERVICES_TO_RUN = [
-    jobs.__file__.replace(os.getcwd(), "").strip("/"),
-    current_allocated_nodes.__file__.replace(os.getcwd(), "").strip("/"),
+    jobs.__file__,
+    current_allocated_nodes.__file__,
 ]
