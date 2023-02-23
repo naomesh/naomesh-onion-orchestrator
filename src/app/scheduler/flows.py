@@ -4,7 +4,7 @@ from contextlib import ExitStack
 import enoslib as en
 
 from app.orion.naomesh_orchestration_policy import EnergyPolicy, QualityPolicy
-from app.scheduler.tasks import run_step, setup_node
+from app.scheduler.tasks import push_results, run_step, setup_node
 from prefect import flow, get_run_logger, tags
 from prefect.task_runners import SequentialTaskRunner
 
@@ -30,7 +30,9 @@ def photogrammetry_flow(
     result = setup_node.submit(
         job_id, picture_obj_key, politic_energy_name, politic_quality_name
     )
-    roles, provider, host = result.result()
+    number_of_pics = 0
+    roles, provider = result.result()
+    host = provider.sshable_hosts[0]._where[2]
     # SEQUENTIAL: 0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15
     with ExitStack() as _:
         # 0. Intrinsics analysis (openMVG_main_SfMInit_ImageListing)
@@ -38,6 +40,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             0,
             roles,
@@ -48,6 +52,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             1,
             roles,
@@ -58,6 +64,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             2,
             roles,
@@ -68,6 +76,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             3,
             roles,
@@ -78,6 +88,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             4,
             roles,
@@ -88,6 +100,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             5,
             roles,
@@ -111,6 +125,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             11,
             roles,
@@ -121,6 +137,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             12,
             roles,
@@ -131,6 +149,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             13,
             roles,
@@ -141,6 +161,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             14,
             roles,
@@ -151,6 +173,8 @@ def photogrammetry_flow(
             picture_obj_key,
             politic_energy_name,
             politic_quality_name,
+            job_id,
+            number_of_pics,
             host,
             15,
             roles,
@@ -160,8 +184,16 @@ def photogrammetry_flow(
         # run_step(picture_obj_key, 16, roles)
         # 17. Fuse disparity-maps (DensifyPointCloud)
         # run_step(picture_obj_key, 17, roles)
-
-    # provider.destroy()
+        push_results(
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
+            job_id,
+            number_of_pics,
+            host,
+            roles,
+        )
+    provider.destroy()
 
 
 def start_photogrammetry_flow_with_tags(
@@ -171,6 +203,10 @@ def start_photogrammetry_flow_with_tags(
     politic_quality_name: str = QualityPolicy.GOOD.value,
 ):
     with tags(politic_energy_name, politic_quality_name):
+
         photogrammetry_flow(
-            job_id, picture_obj_key, politic_energy_name, politic_quality_name
+            job_id,
+            picture_obj_key,
+            politic_energy_name,
+            politic_quality_name,
         )

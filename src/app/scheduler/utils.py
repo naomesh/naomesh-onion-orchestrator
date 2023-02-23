@@ -35,14 +35,14 @@ class with_redirect_stdout_to_run_logger(_RedirectStream):
     """Context manager for temporarily redirecting stdout to orion's logger."""
 
     def __init__(self, logger: Optional[Logger] = None):
-        self.logger = logger if logger else get_run_logger()
+        self.logger = logger or get_run_logger()
         self.logger_writer = LoggerWriter(self.logger.info)
         super().__init__(self.logger_writer)
 
     _stream = "stdout"
 
 
-def task_input_hash_no_roles(
+def task_input_hash_no_roles_node(
     context: "TaskRunContext", arguments: Dict[str, Any]
 ) -> Optional[str]:
     """
@@ -70,7 +70,7 @@ def task_input_hash_no_roles(
         # NOTE: don´t take into account the source code
         # of the function, we don't mind it.
         # context.task.fn.__code__.co_code.hex(),
-        without_keys(arguments, ["roles"]),
+        without_keys(arguments, ["roles", "node_id"]),
     )
 
 
