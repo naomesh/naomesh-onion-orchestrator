@@ -1,0 +1,5 @@
+.env.example
+*.md
+uploads/
+.chglog
+.vscode
