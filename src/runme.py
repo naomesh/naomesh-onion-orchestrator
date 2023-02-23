@@ -11,6 +11,7 @@ from tomodachi.launcher import ServiceLauncher
 
 # HACK: ahead
 import app.enoslib.login  # noqa
+from app.models.results import push_schema
 import prefect
 from app._version import get_versions
 from app.orion.config import apply_prefect_config_settings  # noqa
@@ -70,8 +71,7 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
 
     visit_dashboard = textwrap.dedent(
         f"""
-        Check out the dashboard at {base_url}
-        """
+        Check out the dashboard at {base_url}"""
     )
 
     dashboard_not_built = textwrap.dedent(
@@ -116,16 +116,18 @@ async def start_orion_and_tomodachi(
     server_env["PREFECT_ORION_SERVICES_LATE_RUNS_ENABLED"] = str(late_runs)
     server_env["PREFECT_ORION_SERVICES_UI"] = str(ui)
     server_env["PREFECT_LOGGING_SERVER_LEVEL"] = log_level
+    base_url = f"http://{host}:{port}"
+    print(generate_welcome_blurb(base_url, ui_enabled=ui))
     print("Applying prefect config settings to current profile...")
     apply_prefect_config_settings()
     print("...OK")
 
+    print("Running upgrade migrations ..")
     await upgrade_database()
-    base_url = f"http://{host}:{port}"
+    await push_schema()
+    print("...OK")
 
     async with anyio.create_task_group() as tg:
-        print(generate_welcome_blurb(base_url, ui_enabled=ui))
-        print("\n")
         orion_process_id = await tg.start(
             partial(
                 run_process,
@@ -151,10 +153,10 @@ async def start_orion_and_tomodachi(
         flows = await get_client().read_flow_runs()
         for flow in flows:
             await get_client().delete_flow_run(flow.id)
-
         print("Starting tomodachi services...")
         await tg.start(start_tomodachi_services)
         print("...OK")
+        print("😎 Onion started! Press Ctrl+C to stop. 😎")
 
         # Explicitly handle the interrupt signal here, as it will allow us to
         # cleanly stop the Orion uvicorn server. Failing to do that may cause a
