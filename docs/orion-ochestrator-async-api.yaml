@@ -249,7 +249,7 @@ components:
       properties:
         job_id:
           type: string
-        pictures_obj_key:
+        pictures_obj_key: #TODO: one day, fix the orchestrator variable internals to match this
           type: string
           description: S3 folder pictures obj key
           example: /{job_id}/uploads
