@@ -3,6 +3,7 @@ from app.core.config import env
 
 
 # HACK: Tell Bapiste to create an api for this
+# It monkey patch python-g5k
 with g5k_api_utils._api_lock:
     if not g5k_api_utils._api_client:
         g5k_api_utils._api_client = g5k_api_utils.Client(
