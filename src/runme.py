@@ -9,10 +9,12 @@ import anyio.abc
 import nest_asyncio
 from tomodachi.launcher import ServiceLauncher
 
+# HACK: ahead
 import app.enoslib.login  # noqa
 import prefect
 from app._version import get_versions
 from app.orion.config import apply_prefect_config_settings  # noqa
+from app.orion.database import upgrade_database  # noqa
 from app.scheduler.deployments import apply_deployments
 from app.services import SERVICES_TO_RUN
 from prefect.client.orion import get_client
@@ -115,13 +117,12 @@ async def start_orion_and_tomodachi(
     server_env["PREFECT_ORION_SERVICES_UI"] = str(ui)
     server_env["PREFECT_LOGGING_SERVER_LEVEL"] = log_level
     apply_prefect_config_settings()
-
+    await upgrade_database()
     base_url = f"http://{host}:{port}"
 
     async with anyio.create_task_group() as tg:
         print(generate_welcome_blurb(base_url, ui_enabled=ui))
         print("\n")
-        await tg.start(start_tomodachi_services)
         orion_process_id = await tg.start(
             partial(
                 run_process,
@@ -140,12 +141,17 @@ async def start_orion_and_tomodachi(
                 stream_output=True,
             )
         )
+
         await apply_deployments()
 
         # NOTE: delete flow runs at startup to avoid orphaned flow runs
         flows = await get_client().read_flow_runs()
         for flow in flows:
             await get_client().delete_flow_run(flow.id)
+
+        print("Starting tomodachi services...")
+        await tg.start(start_tomodachi_services)
+        print("...OK")
 
         # Explicitly handle the interrupt signal here, as it will allow us to
         # cleanly stop the Orion uvicorn server. Failing to do that may cause a
