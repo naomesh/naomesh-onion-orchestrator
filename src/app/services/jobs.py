@@ -72,6 +72,7 @@ class JobsService(tomodachi.Service):
                 message["politic"]["quality"],
             ],
         )
+        t1.daemon = True
         t1.start()
 
     @tomodachi.schedule(interval=1)
