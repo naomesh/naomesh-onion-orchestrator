@@ -1,7 +1,7 @@
-# Naomesh - Orchestrateur
+# Naomesh - ORCHESTRATOR
 
 ```blank
-                  /~    NAOMESH ONION OCHERSTRATOR
+                  /~    NAOMESH ONION ORCHESTRATOR
                     \  \ /**     BUNDLED WITH
                     \ ////        ___ ___ ___ ___ _____________    ___ ___ ___  __   _  _
                     // //        | _ \ _ \ __| __| __/ __|_   _|  / _ \| _ \_ _/ _ \| \| |
@@ -34,7 +34,7 @@ flowchart TD
     SeduceRestApi --> SeduceGrafana
     subgraph Onion orchestrator
     subgraph Prefect
-    Onion-->Postgresql
+    Orion
     StateMachine
     GreenFlowPolicy
     SqlAlchemy
@@ -48,16 +48,14 @@ flowchart TD
     Photogrammetry-prefect-flow <-->|Before transition| GreenFlowPolicy
     StateMachine <--> GreenFlowPolicy
     Jobs ---> Photogrammetry-prefect-flow
-    Jobs <--> Rabbitmq
     Setup-Nodes-Task --> g5k-provider
     Step-Task --> g5k-provider
     Photogrammetry-prefect-flow --> Setup-Nodes-Task
     Photogrammetry-prefect-flow --> Step-Task
     subgraph EnosLib
-    Ansible --> front
 
-    g5k-provider --> Ansible
-    g5k-provider --> Python-grid5000
+    G5k-provider --> Ansible
+    G5k-provider --> Python-grid5000
     Python-grid5000
     end
     subgraph Tomodachi Services
@@ -67,13 +65,19 @@ flowchart TD
     end
     end
     subgraph Grid 5000
-    ecotype-X
-    g5k-rest-api
-    front --> ecotype-X
+    Ecotype-X
+    G5k-rest-api
+    Ansible --> Front
+    Front --> Ecotype-X
     end
-    Rabbitmq
-    Postgresql
+    Jobs <--> Rabbitmq
+    Orion-->Postgresql
 ```
+
+## Asyncapi
+
+See
+[docs/orion-ochestrator-async-api.yaml](docs/orion-ochestrator-async-api.yaml)
 
 ## Setup
 
