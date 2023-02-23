@@ -43,7 +43,10 @@ def run_step(
         en.run_ansible(
             [path.join(BASE_DIR, "g5kecotype-node-step-playbook.yml")],
             roles=roles,
-            extra_vars={"step_idx": step_idx},
+            extra_vars={
+                "step_idx": step_idx,
+                "quality_policy": politic_quality_name,
+            },
         )
 
 
