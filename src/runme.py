@@ -116,7 +116,10 @@ async def start_orion_and_tomodachi(
     server_env["PREFECT_ORION_SERVICES_LATE_RUNS_ENABLED"] = str(late_runs)
     server_env["PREFECT_ORION_SERVICES_UI"] = str(ui)
     server_env["PREFECT_LOGGING_SERVER_LEVEL"] = log_level
+    print("Applying prefect config settings to current profile...")
     apply_prefect_config_settings()
+    print("...OK")
+
     await upgrade_database()
     base_url = f"http://{host}:{port}"
 
