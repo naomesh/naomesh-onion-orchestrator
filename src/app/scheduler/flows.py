@@ -24,7 +24,7 @@ def photogrammetry_flow(
     politic_quality_name: str = QualityPolicy.GOOD.value,
 ):
     """Photogrammetry flow"""
-    print(get_run_logger())
+    print("Starting pipeline...")
     en.init_logging(level=logging.INFO).getLogger()
 
     result = setup_node.submit(
