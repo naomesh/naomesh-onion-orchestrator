@@ -61,7 +61,6 @@ class GreenFlowPolicy(BaseOrchestrationRule):
             delay_seconds=wait_seconds,
             reason=f"${production_solar_panel} < ${minimum_production_solar_panel} or no available nodes",  # noqa: E501
         )
-        print("delay_transition")
         self.context.proposed_state = states.AwaitingRetry(
             scheduled_time=scheduled_start_time
         )
