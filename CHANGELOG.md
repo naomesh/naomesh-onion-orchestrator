@@ -2,6 +2,37 @@
 ## [Unreleased]
 
 
+<a name="0.0.2"></a>
+## [0.0.2] - 2023-02-23
+### Chore
+- add asyncio dep
+- add dockerignore
+- remove not used patch
+- splash in readme
+- add changelog
+
+### Docs
+- add todo
+- add asyncapi schema and small typos fix
+- add schematic
+
+### Feat
+- use quality from policy
+- push final results in pipeline to database (not the schema)
+- push results to database
+- add new env variable to disable g5k_auto_jump
+- start new threads in deamon mode
+- add more logging on boostrap
+- send jobs.finished when job is finished
+
+### Fix
+- invalid float timestamp
+- delete result before push
+- invalid jobstatus message format
+- apply migrations at launch
+- timestamp in ms
+
+
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2023-02-23
 ### Chore
@@ -61,4 +92,5 @@
 - move task_input_hash to utils
 
 
-[Unreleased]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.2...HEAD
+[0.0.2]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/v0.0.1...0.0.2
