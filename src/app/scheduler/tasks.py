@@ -1,15 +1,18 @@
-from datetime import timedelta
+import asyncio
+from datetime import datetime, timedelta
 from os import path
 
-import enoslib as en
-from enoslib import Roles
+import tomodachi
 
+import enoslib as en
 from app.core.config import BASE_DIR, env
 from app.scheduler.utils import (
     task_input_hash_no_roles_node,
     with_redirect_stdout_to_run_logger,
 )
+from enoslib import Roles
 from prefect import task
+from prefect.context import FlowRunContext
 
 
 @task(
@@ -77,27 +80,41 @@ def push_results(
         )
     print("Results pushed to s3")
     print("Publishing finished message AMQP")
-    # service = tomodachi.get_service("jobs-amqp-service")
-    # politic = {
-    #     "energy": politic_energy_name,
-    #     "quality": politic_quality_name,
-    # }
+    service = tomodachi.get_service("jobs-amqp-service")
+    politic = {
+        "energy": politic_energy_name,
+        "quality": politic_quality_name,
+    }
+    parent_flow_run_context = FlowRunContext.get()
 
-    # TODO: implement node_uses
-    # node_uses = [
-    #     {
-    #         "node_id": node_id,
-    #         "start_time": "2021-01-01T00:00:00Z",
-    #         "end_time": "2021-01-01T00:00:00Z",
-    #     }
-    # ]
-    # await service.send_job_finished(
-    #     job_id,
-    #     node_uses,
-    #     f"/{job_id}/results/scene_dense_mesh.ply",
-    #     f"/{job_id}/results/scene_dense_mesh_texture.png",
-    #     politic,
-    # )
+    node_uses = [
+        {
+            "node_id": node_id,
+            "start_time": (
+                (
+                    parent_flow_run_context.start_time or datetime.now()
+                ).timestamp()
+                * 1000
+            )
+            if parent_flow_run_context
+            else datetime.now().timestamp() * 1000,
+            "end_time": datetime.now().timestamp(),
+        }
+    ]
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(
+        asyncio.gather(
+            service.send_job_finished(
+                job_id,
+                node_uses,
+                f"/{job_id}/results/scene_dense_mesh.ply",
+                f"/{job_id}/results/scene_dense_mesh_texture.png",
+                politic,
+            )
+        )
+    )
+    loop.close()
 
 
 @task(
