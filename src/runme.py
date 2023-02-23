@@ -38,7 +38,7 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
 
     blurb = textwrap.dedent(
         r"""
-                    /~    NAOMESH ONION OCHERSTRATOR
+                    /~    NAOMESH ONION ORCHESTRATOR
                     \  \ /**     VERSION {version} BUNDLED WITH
                     \ ////        ___ ___ ___ ___ _____________    ___ ___ ___  __   _  _
                     // //        | _ \ _ \ __| __| __/ __|_   _|  / _ \| _ \_ _/ _ \| \| |
