@@ -234,7 +234,7 @@ class JobsService(tomodachi.Service):
         }
         await tomodachi.amqp_publish(
             self,
-            routing_key="orchestration.jobs.requests",
+            routing_key="orchestration.jobs.finished",
             exchange_name="amq.direct",
             data=message,
         )
