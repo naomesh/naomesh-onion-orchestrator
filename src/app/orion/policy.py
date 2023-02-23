@@ -3,6 +3,7 @@ from typing import Optional
 import pendulum
 
 from app.core.config import env
+from app.enoslib.utils import is_there_one_node_available
 from app.orion.naomesh_orchestration_policy import EnergyPolicy
 from app.seduce.api.default.get_live_production_solar_panels import asyncio
 from app.seduce.client import Client
@@ -16,7 +17,7 @@ from prefect.orion.orchestration.rules import (
 from prefect.orion.schemas import core, states
 from prefect.orion.schemas.states import StateType
 
-api_client = Client(base_url=env("NAOMESH_ORCHESTRATOR_SEDUCE_API_URL"))
+api_client = Client(base_url=env("NAOMESH_ORCHESTRATOR_SEDUCE_API_URL"))  # type: ignore # noqa: E501
 
 
 class GreenFlowPolicy(BaseOrchestrationRule):
@@ -47,24 +48,26 @@ class GreenFlowPolicy(BaseOrchestrationRule):
             production_solar_panel,
             minimum_production_solar_panel,
         ) = await enough_energy()
-        if enough_energy_res:
+        node_available = await is_there_one_node_available()
+        if enough_energy_res and node_available:
             return
         updated_policy = context.run.empirical_policy.dict()
         updated_policy["resuming"] = False
         updated_policy["pause_keys"] = set()
         context.run.empirical_policy = core.FlowRunPolicy(**updated_policy)
-        wait_seconds = 10
+        wait_seconds = 10  # TODO: make this a parameter
         scheduled_start_time = pendulum.now("UTC").add(seconds=wait_seconds)
         await self.delay_transition(
             delay_seconds=wait_seconds,
-            reason=f"${production_solar_panel} < ${minimum_production_solar_panel}",  # noqa: E501
+            reason=f"${production_solar_panel} < ${minimum_production_solar_panel} or no available nodes",  # noqa: E501
         )
-        print("wait")
+        print("delay_transition")
         self.context.proposed_state = states.AwaitingRetry(
             scheduled_time=scheduled_start_time
         )
 
 
+# TODO: implement task transition to pause tasks
 class GreenTaskPolicy(BaseOrchestrationRule):
     """
     Check if the task is in the green energy policy and if the
@@ -91,19 +94,24 @@ class GreenTaskPolicy(BaseOrchestrationRule):
         pass
 
 
-test = 2
-
-
 async def enough_energy():
-    production_solar_panel = 5
+    """
+    Check if the solar panel production is enough
+    If the api is not available, we assume that the production is enough
+    """
+    production_solar_panel = -1.0
     minimum_production_solar_panel: int = env(
         "NAOMESH_ORCHESTRATOR_MINIMUM_PRODUCTION_SOLAR_PANELS"
     )
     solar_production_enough = True
     try:
         response = await asyncio(client=api_client)
+        production_solar_panel: float = (
+            response.data if response is not None else 0.0
+        )  # type: ignore
+
         solar_production_enough = (
-            response.data >= minimum_production_solar_panel
+            production_solar_panel >= minimum_production_solar_panel
         )
     except Exception:
         print("Could not contact seduce api")
