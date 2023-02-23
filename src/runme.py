@@ -15,7 +15,7 @@ from app._version import get_versions
 from app.orion.config import apply_prefect_config_settings  # noqa
 from app.scheduler.deployments import apply_deployments
 from app.services import SERVICES_TO_RUN
-
+from prefect.client.orion import get_client
 from prefect.settings import (
     PREFECT_LOGGING_SERVER_LEVEL,
     PREFECT_ORION_API_HOST,
@@ -142,6 +142,11 @@ async def start_orion_and_tomodachi(
         )
         await apply_deployments()
 
+        # NOTE: delete flow runs at startup to avoid orphaned flow runs
+        flows = await get_client().read_flow_runs()
+        for flow in flows:
+            await get_client().delete_flow_run(flow.id)
+
         # Explicitly handle the interrupt signal here, as it will allow us to
         # cleanly stop the Orion uvicorn server. Failing to do that may cause a
         # large amount of anyio error traces on the terminal, because the
@@ -150,7 +155,9 @@ async def start_orion_and_tomodachi(
         # https://github.com/PrefectHQ/orion/issues/2475
 
         kill_on_interrupt(orion_process_id, "Orion", print)  # type: ignore
+
     print("Orion stopped!")
+    ServiceLauncher.stop_services()
 
 
 async def start_tomodachi_services(task_status):
