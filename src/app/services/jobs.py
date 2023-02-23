@@ -113,10 +113,12 @@ class JobsService(tomodachi.Service):
                     (flow_run.state_name or "running").lower()
                 ),
                 "last_paused_date": 0,  # TODO: implement last_paused_date
-                "last_started_date": (
-                    flow_run.start_time or datetime.now(timezone.utc)
-                ).timestamp()
-                * 1000,
+                "last_started_date": int(
+                    (
+                        flow_run.start_time or datetime.now(timezone.utc)
+                    ).timestamp()
+                    * 1000
+                ),
                 "step_idx": 0,  # this is a not started flow, so step_idx is 0
                 "pictures_quantity": 0,
                 "node_id": None,
@@ -130,7 +132,9 @@ class JobsService(tomodachi.Service):
                             ],
                             flow_run.tags,
                         )
-                    ),
+                    )[
+                        0
+                    ],  # TODO: refactor this, don't use [0]
                     "energy": list(
                         filter(
                             lambda tag: tag
@@ -140,7 +144,9 @@ class JobsService(tomodachi.Service):
                             ],
                             flow_run.tags,
                         )
-                    ),
+                    )[
+                        0
+                    ],  # TODO: refactor this, don't use [0]
                 },
                 "consumption": -1,  # TODO: implement consumption
                 "pictures_obj_key": flow_run.parameters["picture_obj_key"],
@@ -154,10 +160,12 @@ class JobsService(tomodachi.Service):
                     (task_run.state_name or "running").lower()
                 ),
                 "last_paused_date": 0,  # TODO: implement last_paused_date
-                "last_started_date": (
-                    task_run.start_time or datetime.now(timezone.utc)
-                ).timestamp()
-                * 1000,
+                "last_started_date": int(
+                    (
+                        task_run.start_time or datetime.now(timezone.utc)
+                    ).timestamp()
+                    * 1000
+                ),
                 "step_idx": int(metadata["s"]),
                 "pictures_quantity": int(metadata["n"]),
                 "node_id": map_node_uid_to_seduce_uid(metadata["i"]),
