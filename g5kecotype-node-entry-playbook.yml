@@ -1,33 +1,45 @@
 ---
-- name: Push data images
+- name: Setup up pip
   hosts: all
   tasks:
-    - find: paths="dataset/" recurse=yes patterns="*"
-      register: files_to_copy
-    - name: Upload images
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: /mnt/pictures
-        mode: 0777
-      with_items: "{{ files_to_copy.files }}"
+    # - find: paths="dataset/" recurse=yes patterns="*"
+    #   register: files_to_copy
+    # - name: Upload images
+    #   ansible.builtin.copy:
+    #     src: "{{ item }}"
+    #     dest: /mnt/pictures
+    #     mode: 0777
+    #   with_items: "{{ files_to_copy.files }}"
+    - name: Install docker-compose python package and boto
+      ansible.builtin.pip:
+        name:
+          - botocore
+          - boto3
+          - docker-compose
 - name: Setup docker-compose
   hosts: all
   tasks:
-    - name: Install docker-compose python package
-      ansible.builtin.pip:
-        name: docker-compose
-    - name: Push docker-compose.yml and .env
+    - name: Push .env #NOTE: This step is now relatively useless
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: "/{{ ansible_user }}/{{ item }}"
       with_items:
-        - g5kecotype-node-docker-compose.yml
         - .env
-- name: Set docker containers
+    - name: create directory
+      ansible.builtin.file:
+        path: /mnt/pictures
+        state: directory
+        mode: 0775
+- name: Set docker containers and pull images
   hosts: all
   # debugger: on_failed
   vars:
     container_name: openmvsmvg
+    s3_host: "{{s3_host}}"
+    s3_bucket_name: "{{s3_bucket_name}}"
+    picture_obj_key: "{{picture_obj_key}}"
+    s3_access_key: "{{s3_access_key}}"
+    s3_secret_key: "{{s3_secret_key}}"
   tasks:
     - name: remove container
       docker_container:
@@ -36,22 +48,81 @@
         force_kill: true
     - name: Docker compose up
       docker_compose:
-        project_src: "/{{ ansible_user }}"
-        files:
-          - g5kecotype-node-docker-compose.yml
         state: present
-        # remove_orphans: true
-        # restarted: true
         recreate: always
         debug: true
+        project_name: "naomesh-orion-orchestrator"
+
+        # WORKAROUND(simon): the commented code above does not work,
+        # so instead we use the definition option
+        # it is loading the docker-compose.yml file and everything,
+        # but it caused me some headache to figure out why it was not
+        # deploying volumes correctly.
+        # This deploys volumes correctly.
+
+        # project_src: "/{{ ansible_user }}"
+        # files:
+        #   - g5kecotype-node-docker-compose.yml
+        definition:
+          # This is the docker-compose file deployed on the g5k node
+          version: "3.8"
+
+          services:
+            # s3 vfs: https://docs.docker.com/registry/storage-drivers/s3/
+            # used to fetch needed ressources and store outputs during the
+            # openMVS reconstruction pipeline
+            s3fs:
+              privileged: true
+              image: efrecon/s3fs:1.90
+              restart: unless-stopped
+              environment:
+                - S3FS_ARGS=use_path_request_style
+                - "AWS_S3_BUCKET={{s3_bucket_name}}"
+                - "AWS_S3_URL={{s3_host}}"
+                - "AWS_S3_ACCESS_KEY_ID={{s3_access_key}}"
+                - "AWS_S3_SECRET_ACCESS_KEY={{s3_secret_key}}"
+                - S3FS_DEBUG=1
+              volumes:
+                - s3data:/opt/s3fs/bucket
+
+            # OpenMVS / MVG node used to run the reconstruction pipeline
+            # will have access to the S3 bucket at `/mnt/s3data`
+            openmvsmvg:
+              image: ghcr.io/naomesh/openmvsmvg:1.0.0
+              container_name: openmvsmvg
+              entrypoint: sleep infinity
+              restart: unless-stopped
+              depends_on:
+                - s3fs
+              volumes:
+                - s3data:/home/user/workdir
+                - type: volume
+                  source: pictures
+                  target: /home/user/pictures
+
+          volumes:
+            s3data:
+            pictures:
     - name: Container present
       community.docker.docker_container:
         name: "{{ container_name }}"
-        command: sleep infinity
         state: started
-    - name: Create directories
-      community.docker.docker_container_exec:
-        container: "{{ container_name }}"
-        command: mkdir workdir && mkdir pictures
-        chdir: /home/user
-      register: result
+    - name: get s3_bucket_items
+      aws_s3:
+        s3_url: "{{s3_host}}"
+        bucket: "{{s3_bucket_name}}"
+        prefix: "{{picture_obj_key}}"
+        mode: list
+        aws_access_key: "{{s3_access_key}}"
+        aws_secret_key: "{{s3_secret_key}}"
+      register: s3_bucket_items
+    - name: download s3_bucket_items
+      aws_s3:
+        s3_url: "{{s3_host}}"
+        bucket: "{{s3_bucket_name}}"
+        object: "{{ item }}"
+        dest: /var/lib/docker/volumes/naomesh-orion-orchestrator_pictures/_data/{{ item | basename }}
+        mode: get
+        aws_access_key: "{{s3_access_key}}"
+        aws_secret_key: "{{s3_secret_key}}"
+      with_items: "{{s3_bucket_items.s3_keys}}"

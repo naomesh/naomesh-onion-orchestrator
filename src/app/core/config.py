@@ -30,6 +30,10 @@ env = environ.Env(
     NAOMESH_AMQP_BROKER_PORT=str,
     NAOMESH_AMQP_BROKER_USERNAME=str,
     NAOMESH_AMQP_BROKER_PASSWORD=str,
+    AWS_S3_URL=str,
+    AWS_S3_BUCKET=str,
+    AWS_S3_ACCESS_KEY_ID=str,
+    AWS_S3_SECRET_ACCESS_KEY=str,
 )
 
 # Set the project base directory
