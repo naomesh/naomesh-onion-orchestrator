@@ -7,13 +7,17 @@
     pic_dir: pictures
     work_dir: workdir
     step: "{{ step_idx }}"
+    quality_policy: "{{ quality_policy }}"
   tasks:
-    - name: Run mvgmvs command
+    - name: Run mvgmvs command good
       community.docker.docker_container_exec:
         container: "{{ container_name }}"
-        command: "{{ command_name }} {{ pic_dir }} {{ work_dir }} --steps {{ step }}"
+        command: "{{ command_name }} {{ pic_dir }} {{ work_dir }} --steps {{ step }} --1 p HIGH n 8"
         chdir: /home/user
-      register: result
-    - name: Print stdout
-      debug:
-        var: result.stdout
+      when: quality_policy == "good"
+    - name: Run mvgmvs command bad
+      community.docker.docker_container_exec:
+        container: "{{ container_name }}"
+        command: "{{ command_name }} {{ pic_dir }} {{ work_dir }} --steps {{ step }} --1 p NORMAL n 8"
+        chdir: /home/user
+      when: quality_policy == "bad"
