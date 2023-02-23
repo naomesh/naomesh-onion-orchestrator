@@ -26,6 +26,55 @@
                 /  /    \
 ```
 
+## Onion schematics
+
+```mermaid
+flowchart TD
+    GreenFlowPolicy --> SeduceRestApi
+    SeduceRestApi --> SeduceGrafana
+    subgraph Onion orchestrator
+    subgraph Prefect
+    Onion-->Postgresql
+    StateMachine
+    GreenFlowPolicy
+    SqlAlchemy
+    end
+    subgraph Scheduler
+        Photogrammetry-prefect-flow
+        Setup-Nodes-Task
+        Step-Task
+
+    end
+    Photogrammetry-prefect-flow <-->|Before transition| GreenFlowPolicy
+    StateMachine <--> GreenFlowPolicy
+    Jobs ---> Photogrammetry-prefect-flow
+    Jobs <--> Rabbitmq
+    Setup-Nodes-Task --> g5k-provider
+    Step-Task --> g5k-provider
+    Photogrammetry-prefect-flow --> Setup-Nodes-Task
+    Photogrammetry-prefect-flow --> Step-Task
+    subgraph EnosLib
+    Ansible --> front
+
+    g5k-provider --> Ansible
+    g5k-provider --> Python-grid5000
+    Python-grid5000
+    end
+    subgraph Tomodachi Services
+    Jobs
+    Amqp
+    Schedule
+    end
+    end
+    subgraph Grid 5000
+    ecotype-X
+    g5k-rest-api
+    front --> ecotype-X
+    end
+    Rabbitmq
+    Postgresql
+```
+
 ## Setup
 
 1. `pip install -r requirements.txt`
