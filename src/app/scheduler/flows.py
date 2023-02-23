@@ -5,7 +5,7 @@ import enoslib as en
 
 from app.orion.naomesh_orchestration_policy import EnergyPolicy, QualityPolicy
 from app.scheduler.tasks import push_results, run_step, setup_node
-from prefect import flow, get_run_logger, tags
+from prefect import flow, tags
 from prefect.task_runners import SequentialTaskRunner
 
 

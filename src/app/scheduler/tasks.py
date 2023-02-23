@@ -6,6 +6,7 @@ import tomodachi
 
 import enoslib as en
 from app.core.config import BASE_DIR, env
+from app.models.results import Result, insert_result
 from app.scheduler.utils import (
     task_input_hash_no_roles_node,
     with_redirect_stdout_to_run_logger,
@@ -86,32 +87,46 @@ def push_results(
         "quality": politic_quality_name,
     }
     parent_flow_run_context = FlowRunContext.get()
-
+    start_time = (
+        (
+            (parent_flow_run_context.start_time or datetime.now()).timestamp()
+            * 1000
+        )
+        if parent_flow_run_context
+        else datetime.now().timestamp() * 1000
+    )
+    end_time = datetime.now().timestamp() * 1000
     node_uses = [
         {
             "node_id": node_id,
-            "start_time": (
-                (
-                    parent_flow_run_context.start_time or datetime.now()
-                ).timestamp()
-                * 1000
-            )
-            if parent_flow_run_context
-            else datetime.now().timestamp() * 1000,
-            "end_time": datetime.now().timestamp(),
+            "start_time": start_time,
+            "end_time": end_time,
         }
     ]
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(
         asyncio.gather(
-            service.send_job_finished(
+            service.send_job_finished(  # publish to amqp
                 job_id,
                 node_uses,
                 f"/{job_id}/results/scene_dense_mesh.ply",
                 f"/{job_id}/results/scene_dense_mesh_texture.png",
                 politic,
-            )
+            ),
+            insert_result(
+                Result(  # insert in db
+                    job_id=job_id,
+                    total_consumption_kwh=0,  # TODO
+                    model_obj_key=f"/{job_id}/results/scene_dense_mesh.ply",
+                    texture_obj_key=f"/{job_id}/results/scene_dense_mesh_texture.png",  # noqa: E501
+                    total_production_kwh=0,  # TODO
+                    node_id=node_id,
+                    start_time=start_time,
+                    end_time=end_time,
+                    pictures_quantity=number_of_pics,
+                )
+            ),
         )
     )
     loop.close()
