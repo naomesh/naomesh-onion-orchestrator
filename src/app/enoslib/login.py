@@ -1,9 +1,14 @@
-from enoslib import g5k_api_utils
+from enoslib import g5k_api_utils, set_config
 from app.core.config import env
 
 
 # HACK: Tell Bapiste to create an api for this
 # It monkey patch python-g5k
+
+set_config(
+    g5k_auto_jump=env("NAOMESH_ORCHESTRATOR_ENOSLIB_ENABLE_AUTOJUMP"),
+)
+
 with g5k_api_utils._api_lock:
     if not g5k_api_utils._api_client:
         g5k_api_utils._api_client = g5k_api_utils.Client(
