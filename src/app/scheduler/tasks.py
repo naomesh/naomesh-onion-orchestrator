@@ -90,15 +90,19 @@ def push_results(
         "quality": politic_quality_name,
     }
     parent_flow_run_context = FlowRunContext.get()
-    start_time = (
+    start_time = int(
         (
-            (parent_flow_run_context.start_time or datetime.now()).timestamp()
-            * 1000
+            (
+                (
+                    parent_flow_run_context.start_time or datetime.now()
+                ).timestamp()
+                * 1000
+            )
+            if parent_flow_run_context
+            else datetime.now().timestamp() * 1000
         )
-        if parent_flow_run_context
-        else datetime.now().timestamp() * 1000
     )
-    end_time = datetime.now().timestamp() * 1000
+    end_time = int(datetime.now().timestamp() * 1000)
     node_uses = [
         {
             "node_id": node_id,
