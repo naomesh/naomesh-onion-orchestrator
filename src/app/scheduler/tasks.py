@@ -112,7 +112,8 @@ def setup_node(
     politic_quality_name: "str",
 ):
     with with_redirect_stdout_to_run_logger():
-        en.check()
+        if env("NAOMESH_ORCHESTRATOR_ENOSLIB_ENABLE_AUTOJUMP"):
+            en.check()  # NOTE: This will not work inside g5k
         network = en.G5kNetworkConf(
             type="prod",
             roles=["naomesh"],
