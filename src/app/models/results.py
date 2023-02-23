@@ -1,4 +1,5 @@
-from sqlalchemy import Column, MetaData
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import Column, MetaData, delete
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy.orm import declarative_base
@@ -23,12 +24,21 @@ class Result(Base):
     pictures_quantity = Column(Integer)
 
 
+async def insert_or_update(dbsession: AsyncSession, res: Result):
+    """Replaces the the column last_event_at for a named pair."""
+    q = delete(Result).where(Result.job_id == res.job_id)
+    await dbsession.execute(q)
+    await dbsession.commit()
+    async with dbsession.begin():
+        dbsession.add_all([res])
+    await dbsession.commit()
+
+
 async def insert_result(res: Result):
     _, async_session = get_engine()
     async with async_session() as session:  # type: ignore
-        async with session.begin():
-            await session.add_all(res)
-            await session.commit()
+        await insert_or_update(session, res)
+        await session.commit()
 
 
 async def push_schema():
