@@ -2,6 +2,7 @@
 
 # enoslib>=8.0.1
 -e git+https://gitlab.inria.fr/discovery/enoslib@c3e8dc4a0778d57845368f736ffffab2ba0fe898#egg=enoslib
+sqlalchemy[asyncio] >= 1.4.22, != 1.4.33, < 2.0
 prefect>=2.8.0
 django-environ~=0.9.0
 python-grid5000~=1.2.4
@@ -11,6 +12,5 @@ tomodachi>=0.24.0
 httpx>=0.15.4,<0.24.0
 attrs>=21.3.0
 python-dateutil>=2.8.0
-
 # Keep this dot below, it will apply pyproject.toml config as it will install the project
 .
