@@ -12,7 +12,7 @@ from app.scheduler.utils import (
     with_redirect_stdout_to_run_logger,
 )
 from enoslib import Roles
-from app.services.utils import map_node_uid_to_seduce_uid
+from app.scheduler.utils import map_node_uid_to_seduce_uid
 from prefect import task
 from prefect.context import FlowRunContext
 
