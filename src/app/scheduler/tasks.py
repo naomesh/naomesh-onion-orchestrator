@@ -90,24 +90,18 @@ def push_results(
         "quality": politic_quality_name,
     }
     parent_flow_run_context = FlowRunContext.get()
-    start_time = int(
-        (
-            (
-                (
-                    parent_flow_run_context.start_time or datetime.now()
-                ).timestamp()
-                * 1000
-            )
-            if parent_flow_run_context
-            else datetime.now().timestamp() * 1000
-        )
+    start_time = (
+        ((parent_flow_run_context.start_time or datetime.now()))
+        if parent_flow_run_context
+        else datetime.now()
     )
-    end_time = int(datetime.now().timestamp() * 1000)
+
+    end_time = datetime.now()
     node_uses = [
         {
             "node_id": node_id,
-            "start_time": start_time,
-            "end_time": end_time,
+            "start_time": int(start_time.timestamp()),
+            "end_time": int(end_time.timestamp()),
         }
     ]
     loop = asyncio.new_event_loop()

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Column, MetaData, delete
+from sqlalchemy import Column, DateTime, MetaData, delete
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy.orm import declarative_base
@@ -19,8 +19,8 @@ class Result(Base):
     texture_obj_key = Column(String())
     total_production_kwh = Column(Integer)
     node_id = Column(String())
-    start_time = Column(Integer)
-    end_time = Column(Integer)
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
     pictures_quantity = Column(Integer)
 
 
