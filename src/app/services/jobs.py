@@ -163,7 +163,10 @@ class JobsService(tomodachi.Service):
                 "last_paused_date": 0,  # TODO: implement last_paused_date
                 "last_started_date": int(
                     (
-                        task_run.start_time or datetime.now(timezone.utc)
+                        task_run.start_time
+                        or datetime.now(
+                            timezone.utc
+                        )  # TODO: use flow run start_time instead
                     ).timestamp()
                     * 1000
                 ),
