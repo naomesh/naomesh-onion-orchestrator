@@ -2,6 +2,24 @@
 ## [Unreleased]
 
 
+<a name="0.0.4"></a>
+## [0.0.4] - 2023-02-24
+### Docs
+- changelog
+
+### Feat
+- change default host to 0.0.0.0
+
+### Fix
+- remove getting datetime
+- use string date instead
+- time aware object
+- remove timestamp from db
+- invalid date format
+- invalid type in database
+- remove prefect dep
+
+
 <a name="0.0.3"></a>
 ## [0.0.3] - 2023-02-24
 ### Docs
@@ -104,6 +122,7 @@
 - move task_input_hash to utils
 
 
-[Unreleased]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.3...HEAD
+[Unreleased]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.4...HEAD
+[0.0.4]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/v0.0.1...0.0.2
