@@ -133,8 +133,6 @@ async def start_orion_and_tomodachi(
                 run_process,
                 command=[
                     "uvicorn",
-                    "--app-dir",
-                    f'"{prefect.__module_path__.parent}"',
                     "--factory",
                     "prefect.orion.api.server:create_app",
                     "--host",
@@ -144,6 +142,7 @@ async def start_orion_and_tomodachi(
                 ],
                 env=server_env,
                 stream_output=True,
+                cwd=prefect.__module_path__.parent,
             )
         )
 
