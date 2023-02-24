@@ -100,7 +100,7 @@ def generate_welcome_blurb(base_url, ui_enabled: bool):
 
 
 async def start_orion_and_tomodachi(
-    host: str = PREFECT_ORION_API_HOST.value(),
+    host: str = "0.0.0.0",
     port: int = PREFECT_ORION_API_PORT.value(),
     log_level: str = PREFECT_LOGGING_SERVER_LEVEL.value(),
     scheduler: bool = PREFECT_ORION_SERVICES_SCHEDULER_ENABLED.value(),
