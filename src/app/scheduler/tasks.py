@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
 from os import path
-from pytz import utc
 
 import tomodachi
 
@@ -13,6 +12,7 @@ from app.scheduler.utils import (
     with_redirect_stdout_to_run_logger,
 )
 from enoslib import Roles
+from app.services.utils import map_node_uid_to_seduce_uid
 from prefect import task
 from prefect.context import FlowRunContext
 
@@ -123,7 +123,7 @@ def push_results(
                     model_obj_key=f"/{job_id}/results/scene_dense_mesh.ply",
                     texture_obj_key=f"/{job_id}/results/scene_dense_mesh_texture.png",  # noqa: E501
                     total_production_kwh=0,  # TODO
-                    node_id=node_id,
+                    node_id=map_node_uid_to_seduce_uid(node_id),
                     start_time=start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     end_time=end_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     pictures_quantity=number_of_pics,
