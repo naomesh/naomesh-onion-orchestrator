@@ -12,7 +12,7 @@ attrs>=21.3.0
 python-dateutil>=2.8.0
 # Keep this dot below, it will apply pyproject.toml config as it will install the project
 
-# 
+# Prefect deps
 
 aiosqlite >= 0.17.0
 alembic >= 1.7.5
