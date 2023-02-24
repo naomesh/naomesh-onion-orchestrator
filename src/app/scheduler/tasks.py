@@ -91,12 +91,12 @@ def push_results(
     }
     parent_flow_run_context = FlowRunContext.get()
     start_time = (
-        ((parent_flow_run_context.start_time or datetime.now(timezone.utc)))
+        ((parent_flow_run_context.start_time or datetime.now()))
         if parent_flow_run_context
-        else datetime.now(timezone.utc)
+        else datetime.now()
     )
 
-    end_time = datetime.now(timezone.utc)
+    end_time = datetime.now()
     node_uses = [
         {
             "node_id": node_id,
