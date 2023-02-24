@@ -2,6 +2,18 @@
 ## [Unreleased]
 
 
+<a name="0.0.3"></a>
+## [0.0.3] - 2023-02-24
+### Docs
+- changelog
+
+### Fix
+- proper module orion launch
+- require prefect orion
+- remove prefect dep
+- remove delay_transition
+
+
 <a name="0.0.2"></a>
 ## [0.0.2] - 2023-02-23
 ### Chore
@@ -92,5 +104,6 @@
 - move task_input_hash to utils
 
 
-[Unreleased]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.2...HEAD
+[Unreleased]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.3...HEAD
+[0.0.3]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/naomesh/naomesh-onion-orchestrator/compare/v0.0.1...0.0.2
