@@ -19,8 +19,8 @@ class Result(Base):
     texture_obj_key = Column(String())
     total_production_kwh = Column(Integer)
     node_id = Column(String())
-    start_time = Column(type_=TIMESTAMP(timezone=False))
-    end_time = Column(type_=TIMESTAMP(timezone=False))
+    start_time = Column(type_=TIMESTAMP(timezone=True))
+    end_time = Column(type_=TIMESTAMP(timezone=True))
     pictures_quantity = Column(Integer)
 
 
