@@ -2,7 +2,6 @@
 
 # enoslib>=8.0.1
 -e git+https://gitlab.inria.fr/discovery/enoslib@c3e8dc4a0778d57845368f736ffffab2ba0fe898#egg=enoslib
-prefect==2.8.1 #TODO: remove this, it it causing a lot of troubles
 django-environ~=0.9.0
 python-grid5000~=1.2.4
 requests~=2.28.1
