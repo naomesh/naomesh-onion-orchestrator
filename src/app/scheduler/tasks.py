@@ -91,15 +91,13 @@ def push_results(
         "quality": politic_quality_name,
     }
     parent_flow_run_context = FlowRunContext.get()
-    start_time = utc.localize(
-        (
-            ((parent_flow_run_context.start_time or datetime.now()))
-            if parent_flow_run_context
-            else datetime.now()
-        )
+    start_time = (
+        ((parent_flow_run_context.start_time or datetime.now()))
+        if parent_flow_run_context
+        else datetime.now()
     )
 
-    end_time = utc.localize(datetime.now())
+    end_time = datetime.now()
     node_uses = [
         {
             "node_id": node_id,
