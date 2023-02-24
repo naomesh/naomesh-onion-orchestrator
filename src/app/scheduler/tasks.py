@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from os import path
 
 import tomodachi
@@ -91,12 +91,12 @@ def push_results(
     }
     parent_flow_run_context = FlowRunContext.get()
     start_time = (
-        ((parent_flow_run_context.start_time or datetime.now()))
+        ((parent_flow_run_context.start_time or datetime.now(timezone.utc)))
         if parent_flow_run_context
-        else datetime.now()
+        else datetime.now(timezone.utc)
     )
 
-    end_time = datetime.now()
+    end_time = datetime.now(timezone.utc)
     node_uses = [
         {
             "node_id": node_id,
